@@ -6,6 +6,111 @@
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
   <script type="text/babel">
+    
+        const parse = (xhr, contentElement) => {
+            const object = JSON.parse(xhr.response);
+            console.dir(object);
+            
+            
+            if (object.message) {
+                const pElement = document.createElement('p');
+                pElement.textContent = `Message from JSON element: ${object.message}`;
+                contentElement.appendChild(p);
+            }
+            if (object.users) {
+                const listOfUsers = document.createElement('p');
+                const userString = JSON.stringify(object.users);
+                listOfUsers.textContent = userString;
+                content.appendChild(listOfUsers);
+            }
+            
+        };
+
+        const handleResponse = (xhr) => {
+            
+            const contentElement = document.querySelector("#content");
+            contentElement.innerHTML = "";
+            
+            if (xhr.response) {
+                const object = JSON.parse(xhr.response);
+                
+                contentElement.innerHTML = object.message || JSON.stringify(object.users);
+            } else {
+                switch (xhr.status) {
+                    case 200:
+                        contentElement.innerHTML = 'Success';
+                        break;
+                    case 201:
+                        contentElement.innerHTML = 'Success, created';
+                        break;
+                    case 204:
+                        contentElement.innerHTML = 'Success, updated';
+                        break;
+                    case 400:   
+                        contentElement.innerHTML = 'Bad Request';
+                        break;
+                    case 404:
+                        contentElement.innerHTML = 'Resource Not Found';
+                        break;
+                    default:
+                        contentElement.innerHTML = 'Unimplemented';
+                        break;
+                }
+            }
+            
+            
+        };
+
+        const requestUpdate = (a, userElement) => {
+            const url = userElement.querySelector('#urlField').value;
+            const method = userElement.querySelector('#methodSelect').value;
+            
+            const xhr = new XMLHttpRequest();
+            xhr.open(method, url);
+            xhr.setRequestHeader('Accept', 'application/json');
+            
+            xhr.onload = () => handleResponse(xhr);
+            xhr.send();
+            a.preventDefault();
+            return false;
+        };
+
+        const sendPost = (a, nameElement) => {
+            const action = nameElement.getAttribute('action');
+            const method = nameElement.getAttribute('method');
+            const name = nameElement.getAttribute('#nameField');
+            const age = nameElement.getAttribute('#ageField');
+            
+            const form = `name=${nameField.value}&age=${ageField.value}`;
+            
+            const xhr = new XMLHttpRequest();
+            xhr.open(method, action);
+            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            xhr.setRequestHeader('Accept', 'application/json');
+            xhr.onload = () => handleResponse(xhr);
+
+            xhr.send(form);
+            
+            a.preventDefault();
+            return false;
+        };
+        
+        const init = () => {
+            
+            const userElement = document.querySelector('#userForm');
+            const nameElement = document.querySelector('#nameForm');
+            
+            const getUsers = (a) => requestUpdate(a, userElement);
+            const addUsers = (a) => sendPost(a, nameElement);
+            userElement.addEventListener('submit', getUsers);
+            nameForm.addEventListener('submit', addUsers); 
+        };
+
+
+        window.onload = init;
+    
+  
+
 
   </script>
 </head>
